@@ -5,3 +5,4 @@
 ##El presente Caso de  Estudio se enfoca en la optimización de la instalación de un sistema híbrido destinado a cubrir una demanda energética diaria variable, la cual puede alcanzar hasta 50.000 kWh/dia. El principal desafío radica en diseñar una configuración que maximice la eficiencia del sistema, minimizando el excedente de energía, ya que un exceso de producción podría generar pérdidas energéticas o requerir inversiones adicionales en sistemas de almacenamiento, lo que afectaría la viabilidad económica del proyecto.
 
 ##Para lograr este objetivo, se consideran diversas restricciones tecnológicas y operativas que son clave para garantizar un diseño eficiente y equilibrado, asegurando que el sistema no solo sea sostenible desde el punto de vista ambiental, sino también económicamente viable y técnicamente factible.
+
