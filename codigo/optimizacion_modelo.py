@@ -3,19 +3,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Parámetros escalados
-E_panel = 1.5         # Energia generada por panel fotovoltaico en kWh/día
-E_turbine = 15        # Energia generada por aerogenerador en kWh/día
-inverter_capacity = 55000  # Capacidad máxima del inversor en kWh/día
-land_available = 140000    # Terreno disponible en m^2
-land_panel = 2           # Superfice requerida por cada panel en m^2
-land_turbine = 50        # Superficie requerida por cada aerogenerador en m^2
+E_panel = 1.5         # kWh/día por panel fotovoltaico
+E_turbine = 15        # kWh/día por aerogenerador
+inverter_capacity = 55000  # Capacidad máxima del inversor (kWh/día)
+land_available = 140000    # Tierra disponible (m^2)
+land_panel = 2           # m^2 requeridos por cada panel
+land_turbine = 50        # m^2 requeridos por cada aerogenerador
 
-# Máxima disponibilidad de equipos
+# Máximos disponibles de equipos
 panels_max = 30000
 turbines_max = 3000
 
 # Generar demandas
-# Demandas desde 1.000 hasta 50.000 kWh/día en pasos de 1.000
+# Demandas desde 1000 hasta 50000 kWh/día en pasos de 1000
 demands = list(range(1000, 50001, 1000))
 
 # Listas para almacenar resultados
@@ -29,35 +29,35 @@ energy_turbines_list = []
 
 # Bucle de optimización
 for demand in demands:
-    # Definición de la función objetivo (minimización del excedente)
+    # Definición del problema de optimización (minimización del excedente)
     model = pulp.LpProblem("Hybrid_System_Optimization", pulp.LpMinimize)
-
+    
     # Variables de decisión
-    x = pulp.LpVariable("Paneles", lowBound=0, upBound=panels_max, cat=pulp.LpInteger)
-    y = pulp.LpVariable("Turbinas", lowBound=0, upBound=turbines_max, cat=pulp.LpInteger)
-    E_excedente = pulp.LpVariable("Exceso_de_energía", lowBound=0, cat=pulp.LpContinuous)
-
+    x = pulp.LpVariable("Panels", lowBound=0, upBound=panels_max, cat=pulp.LpInteger)
+    y = pulp.LpVariable("Turbines", lowBound=0, upBound=turbines_max, cat=pulp.LpInteger)
+    E_excedente = pulp.LpVariable("ExcessEnergy", lowBound=0, cat=pulp.LpContinuous)
+    
     # Restricción 1: Balance de energía
     # La energía generada debe cubrir la demanda más el excedente.
-    model += E_panel * x + E_turbine * y == demand + E_excedente, "Balance_de_Energía"
-
+    model += E_panel * x + E_turbine * y == demand + E_excedente, "Energy_Balance"
+    
     # Restricción 2: Capacidad del inversor
-    model += E_panel * x + E_turbine * y <= inverter_capacity, "Capacidad_inversor"
-
-    # Restricción 3: Disponibilidad de terreno
-    model += land_panel * x + land_turbine * y <= land_available, "Disponibilidad_terreno"
-
+    model += E_panel * x + E_turbine * y <= inverter_capacity, "Inverter_Capacity"
+    
+    # Restricción 3: Disponibilidad de tierra
+    model += land_panel * x + land_turbine * y <= land_available, "Land_Availability"
+    
     # Restricción 4: Relación técnica entre paneles y aerogeneradores (x >= 1.5 * y)
-    model += x >= 1.5 * y, "Relación_técnica"
-
+    model += x >= 1.5 * y, "Technical_Ratio"
+    
     # Función objetivo: Minimizar la energía excedente
-    model += E_excedente, "Minimizar_Energia_Excedente"
-
+    model += E_excedente, "Minimize_Excess_Energy"
+    
     # Resolver el modelo (sin imprimir mensajes)
     model.solve(pulp.PULP_CBC_CMD(msg=0))
-
+    
     # Verificar solución y almacenar resultados
-    if pulp.LpStatus[model.status] == "Óptimo":
+    if pulp.LpStatus[model.status] == "Optimal":
         opt_x = pulp.value(x)
         opt_y = pulp.value(y)
         opt_excess = pulp.value(E_excedente)
@@ -80,6 +80,7 @@ for demand in demands:
 demands_array = np.array(demands_list)
 panels_array = np.array(panels_list)
 turbines_array = np.array(turbines_list)
+
 # Posiciones para las barras agrupadas
 pos = np.arange(len(demands_array))
 bar_width = 0.4
